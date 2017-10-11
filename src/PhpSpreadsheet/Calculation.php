@@ -26,7 +26,7 @@ class Calculation
     //    Opening bracket
     const CALCULATION_REGEXP_OPENBRACE = '\(';
     //    Function (allow for the old @ symbol that could be used to prefix a function, but we'll ignore it)
-    const CALCULATION_REGEXP_FUNCTION = '@?([A-Z][A-Z0-9\.]*)[\s]*\(';
+    const CALCULATION_REGEXP_FUNCTION = '@?((_xlfn\.)?[A-Z][A-Z0-9\.]*)[\s]*\(';
     //    Cell reference (cell or range of cells, with or without a sheet reference)
     const CALCULATION_REGEXP_CELLREF = '((([^\s,!&%^\/\*\+<>=-]*)|(\'[^\']*\')|(\"[^\"]*\"))!)?\$?([a-z]{1,3})\$?(\d{1,7})';
     //    Named Range of cells
