@@ -15,6 +15,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class Calculation
 {
     /** Constants                */
+    //    Old-naming function prefix
+    const XLFN_PREFIX = '_xlfn.';
     /** Regular Expressions        */
     //    Numeric operand
     const CALCULATION_REGEXP_NUMBER = '[-+]?\d*\.?\d+(e[-+]?\d+)?';
@@ -23,7 +25,7 @@ class Calculation
     //    Opening bracket
     const CALCULATION_REGEXP_OPENBRACE = '\(';
     //    Function (allow for the old @ symbol that could be used to prefix a function, but we'll ignore it)
-    const CALCULATION_REGEXP_FUNCTION = '@?(?:_xlfn\.)?([A-Z][A-Z0-9\.]*)[\s]*\(';
+    const CALCULATION_REGEXP_FUNCTION = '@?(?:'.self::XLFN_PREFIX.'\.)?([A-Z][A-Z0-9\.]*)[\s]*\(';
     //    Cell reference (cell or range of cells, with or without a sheet reference)
     const CALCULATION_REGEXP_CELLREF = '((([^\s,!&%^\/\*\+<>=-]*)|(\'[^\']*\')|(\"[^\"]*\"))!)?\$?([a-z]{1,3})\$?(\d{1,7})';
     //    Named Range of cells
@@ -3442,6 +3444,10 @@ class Calculation
 
                 if (preg_match('/^' . self::CALCULATION_REGEXP_FUNCTION . '$/i', $val, $matches)) {
                     $val = preg_replace('/\s/u', '', $val);
+                    if (substr($val, 0, 6) === self::XLFN_PREFIX) {    // support legacy names of functions
+                      $matches[1] = substr($matches[1], 6);
+                      $val  = substr($val, 6);
+                    }
                     if (isset(self::$phpSpreadsheetFunctions[strtoupper($matches[1])]) || isset(self::$controlFunctions[strtoupper($matches[1])])) {    // it's a function
                         $stack->push('Function', strtoupper($val));
                         $ax = preg_match('/^\s*(\s*\))/ui', substr($formula, $index + $length), $amatch);
@@ -3969,6 +3975,10 @@ class Calculation
                 } elseif (preg_match('/^' . self::CALCULATION_REGEXP_NAMEDRANGE . '$/i', $token, $matches)) {
                     $namedRange = $matches[6];
                     $this->debugLog->writeDebugLog('Evaluating Named Range ', $namedRange);
+
+                    if (substr($namedRange, 0, 6) === self::XLFN_PREFIX) {
+                        return $this->raiseFormulaError("undefined named range / function '$token'");
+                    }
 
                     $cellValue = $this->extractNamedRange($namedRange, ((null !== $pCell) ? $pCellWorksheet : null), false);
                     $pCell->attach($pCellParent);
