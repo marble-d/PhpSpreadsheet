@@ -18,6 +18,8 @@ use PhpOffice\PhpSpreadsheet\Calculation\Token\Stack;
 class Calculation
 {
     /** Constants                */
+    //    Old-naming function prefix
+    const XLFN_PREFIX = '_xlfn.';
     /** Regular Expressions        */
     //    Numeric operand
     const CALCULATION_REGEXP_NUMBER = '[-+]?\d*\.?\d+(e[-+]?\d+)?';
@@ -3235,6 +3237,10 @@ class Calculation
 
                 if (preg_match('/^' . self::CALCULATION_REGEXP_FUNCTION . '$/i', $val, $matches)) {
                     $val = preg_replace('/\s/u', '', $val);
+                    if (substr($val, 0, 6) === self::XLFN_PREFIX) {    // support legacy names of functions
+                      $matches[1] = substr($matches[1], 6);
+                      $val  = substr($val, 6);
+                    }
                     if (isset(self::$phpSpreadsheetFunctions[strtoupper($matches[1])]) || isset(self::$controlFunctions[strtoupper($matches[1])])) {    // it's a function
                         $stack->push('Function', strtoupper($val));
                         $ax = preg_match('/^\s*(\s*\))/ui', substr($formula, $index + $length), $amatch);
@@ -3769,7 +3775,7 @@ class Calculation
                     $namedRange = $matches[6];
                     $this->debugLog->writeDebugLog('Evaluating Named Range ', $namedRange);
 
-                    if (substr($namedRange, 0, 6) === '_xlfn.') {
+                    if (substr($namedRange, 0, 6) === self::XLFN_PREFIX) {
                         return $this->raiseFormulaError("undefined named range / function '$token'");
                     }
 
