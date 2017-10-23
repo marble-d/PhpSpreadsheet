@@ -50,6 +50,7 @@ class Stack
                 $this->stack[($this->count - 1)]['localeValue'] = $localeFunction;
             }
         }
+error_log('<'.__FUNCTION__."ed on stack: ".var_export($this->stack[$this->count-1],TRUE));
     }
 
     /**
@@ -59,6 +60,7 @@ class Stack
      */
     public function pop()
     {
+error_log('<'.__FUNCTION__."ed off stack: ".($this->count>0?var_export($this->stack[$this->count-1],TRUE):'empty!'));
         if ($this->count > 0) {
             return $this->stack[--$this->count];
         }

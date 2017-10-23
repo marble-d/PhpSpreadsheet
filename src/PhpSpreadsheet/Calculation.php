@@ -2002,6 +2002,7 @@ class Calculation
         $this->spreadsheet = $spreadsheet;
         $this->cyclicReferenceStack = new CalcEngine\CyclicReferenceStack();
         $this->debugLog = new CalcEngine\Logger($this->cyclicReferenceStack);
+        $this->debugLog->setWriteDebugLog(TRUE);
     }
 
     private static function loadLocales()
@@ -3113,6 +3114,7 @@ class Calculation
 
             //    Find out if we're currently at the beginning of a number, variable, cell reference, function, parenthesis or operand
             $isOperandOrFunction = preg_match($regexpMatchString, substr($formula, $index), $match);
+error_log('<'.__FUNCTION__."> opCharacter is $opCharacter -- $isOperandOrFunction / $expectingOperator");
 
             if ($opCharacter == '-' && !$expectingOperator) {                //    Is it a negation instead of a minus?
                 $stack->push('Unary Operator', '~'); //    Put a negation on the stack
@@ -3278,6 +3280,7 @@ class Calculation
 
                     $output[] = ['type' => 'Cell Reference', 'value' => $val, 'reference' => $val];
                 } else {    // it's a variable, constant, string, number or boolean
+error_log('<'.__FUNCTION__."> val is $val : a variable, constant, string, number or boolean");
                     //    If the last entry on the stack was a : operator, then we may have a row or column range reference
                     $testPrevOp = $stack->last(1);
                     if ($testPrevOp['value'] == ':') {
@@ -3310,7 +3313,6 @@ class Calculation
                             $val = $rangeWS2 . $val . $endRowColRef;
                         }
                     }
-
                     $localeConstant = false;
                     if ($opCharacter == '"') {
                         //    UnEscape any quotes within the string
@@ -3332,6 +3334,7 @@ class Calculation
                         $details['localeValue'] = $localeConstant;
                     }
                     $output[] = $details;
+error_log('<'.__FUNCTION__.'> output: '.var_export($output,TRUE));
                 }
                 $index += $length;
             } elseif ($opCharacter == '$') {    // absolute row or column range
@@ -3763,6 +3766,7 @@ class Calculation
                     $stack->push('Value', self::wrapResult($result));
                 }
             } else {
+error_log('<'.__FUNCTION__.'> token is a number, boolean, string or an Excel error');
                 // if the token is a number, boolean, string or an Excel error, push it onto the stack
                 if (isset(self::$excelConstants[strtoupper($token)])) {
                     $excelConstant = strtoupper($token);
