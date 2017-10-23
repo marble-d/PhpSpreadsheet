@@ -102,11 +102,9 @@ class Logger
                     $message,
                     PHP_EOL;
             }
-            $msg = $cellReference .
+            $this->debugLog[] = $cellReference .
                 ($this->cellStack->count() > 0 ? ' => ' : '') .
                 $message;
-            error_log($msg);
-            $this->debugLog[] = $msg;
         }
     }
 
