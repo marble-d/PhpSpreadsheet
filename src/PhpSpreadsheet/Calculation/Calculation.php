@@ -113,6 +113,7 @@ class Calculation
      * @var string
      */
     public $formulaError;
+    public $formulaErrorDetails = [];
 
     /**
      * An array of the nested cell references accessed by the calculation engine, used for the debug log.
@@ -2816,6 +2817,7 @@ class Calculation
     {
         //    Initialise the logging settings
         $this->formulaError = null;
+        $this->formulaErrorDetails = [];
         $this->debugLog->clearLog();
         $this->cyclicReferenceStack->clear();
 
@@ -3974,6 +3976,8 @@ class Calculation
                     $pCell->attach($pCellParent);
                     $this->debugLog->writeDebugLog('Evaluation Result for named range ', $namedRange, ' is ', $this->showTypeDetails($cellValue));
                     $stack->push('Named Range', $cellValue, $namedRange);
+                    if ($cellValue === Calculation\Functions::REF())
+                        $this->formulaErrorDetails[] = $stack->last();
                 } else {
                     return $this->raiseFormulaError("undefined variable '$token'");
                 }
