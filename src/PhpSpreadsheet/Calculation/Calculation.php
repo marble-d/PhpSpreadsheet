@@ -3700,7 +3700,7 @@ class Calculation
                             $val = $rangeWS2 . $val . $endRowColRef;
                         }
                     }
-
+                    $val_trimmed = rtrim($val, ")");
                     $localeConstant = false;
                     if ($opCharacter == '"') {
                         //    UnEscape any quotes within the string
@@ -3716,6 +3716,9 @@ class Calculation
                         $val = self::$excelConstants[$excelConstant];
                     } elseif (($localeConstant = array_search(trim(strtoupper($val)), self::$localeBoolean)) !== false) {
                         $val = self::$excelConstants[$localeConstant];
+                    } elseif ($val_trimmed !== $val) {   // just an expression enclosed in parentheses
+                        $val = $val_trimmed;
+                        $length = strlen($val);
                     }
                     $details = $stack->getStackItem('Value', $val, null, $currentCondition, $currentOnlyIf, $currentOnlyIfNot);
                     if ($localeConstant) {
