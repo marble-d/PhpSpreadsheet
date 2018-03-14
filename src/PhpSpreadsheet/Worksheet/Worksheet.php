@@ -544,6 +544,16 @@ class Worksheet implements IComparable
     }
 
     /**
+     * Clear the collection of drawings.
+     *
+     * @return NULL
+     */
+    public function clearDrawingCollection()
+    {
+        $this->drawingCollection = new \ArrayObject();
+    }
+
+     /**
      * Get collection of charts.
      *
      * @return Chart[]
