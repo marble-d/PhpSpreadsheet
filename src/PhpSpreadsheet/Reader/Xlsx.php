@@ -1272,7 +1272,27 @@ class Xlsx extends BaseReader
                                 }
                             }
 
-                            if ($xmlSheet && $xmlSheet->dataValidations && !$this->readDataOnly) {
+                            if ($xmlSheet && !$this->readDataOnly) {
+                                // prevent lots of unneeded tests
+                                $xmlSheet->addChild('dataValidations');
+
+                                // handle Microsoft extension if present
+                                if (isset ($xmlSheet->extLst))
+                                  for ($i = 0; isset($xmlSheet->extLst->ext[$i]); $i++)
+                                  {
+                                    $ext = $xmlSheet->extLst->ext[$i];
+                                    if ($ext['uri'] == "{CCE6A557-97BC-4b89-ADB6-D9C93CAAB3DF}")
+                                      // retreive MS extension data to create a node that matches expectations.
+                                      foreach ($ext->children('x14', TRUE)->dataValidations->dataValidation as $item)
+                                      {
+                                        $node = $xmlSheet->dataValidations->addChild('dataValidation');
+                                        foreach ($item->attributes() as $attr)
+                                          $node->addAttribute($attr->getName(), $attr);
+                                        $node->addAttribute('sqref', $item->children('xm',TRUE)->sqref);
+                                        $node->addChild('formula1', $item->formula1->children('xm',TRUE)->f);
+                                      }
+                                  }
+
                                 foreach ($xmlSheet->dataValidations->dataValidation as $dataValidation) {
                                     // Uppercase coordinate
                                     $range = strtoupper($dataValidation['sqref']);
