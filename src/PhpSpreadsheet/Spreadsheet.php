@@ -1124,6 +1124,34 @@ class Spreadsheet
     }
 
     /**
+     * Remove all cellXf
+     */
+    public function removeAllCellXf()
+    {
+        foreach ($this->getWorksheetIterator() as $sheet) {
+            // for all cells
+            foreach ($sheet->getCoordinates(false) as $coordinate) {
+                $sheet->getCell($coordinate)->setXfIndex(0);
+            }
+
+            // for all row dimensions
+            foreach ($sheet->getRowDimensions() as $rowDimension) {
+                if ($rowDimension->getXfIndex() !== null) {
+                    $rowDimension->setXfIndex(0);
+                }
+            }
+
+            // for all column dimensions
+            foreach ($sheet->getColumnDimensions() as $columnDimension) {
+                $columnDimension->setXfIndex(0);
+            }
+
+            // also do garbage collection for all the sheets
+            $sheet->garbageCollect();
+        }
+    }
+
+    /**
      * Get the cellXf supervisor.
      *
      * @return Style
@@ -1197,6 +1225,14 @@ class Spreadsheet
             throw new Exception('CellStyleXf index is out of bounds.');
         }
         array_splice($this->cellStyleXfCollection, $pIndex, 1);
+    }
+
+    /**
+     * Remove all cellStyleXf
+     */
+    public function removeAllCellStyleXf()
+    {
+        $this->cellStyleXfCollection = [];
     }
 
     /**
