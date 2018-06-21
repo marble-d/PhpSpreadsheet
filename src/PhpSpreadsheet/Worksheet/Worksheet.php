@@ -1483,8 +1483,6 @@ class Worksheet implements IComparable
     /**
      * Removes conditional style for all cells.
      *
-     * @param string $pCoordinate eg: 'A1'
-     *
      * @return Worksheet
      */
     public function removeAllConditionalStyles()
