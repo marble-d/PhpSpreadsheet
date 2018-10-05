@@ -1626,13 +1626,18 @@ class Xlsx extends BaseReader
                                                 }
                                             }
                                         }
-                                        $xmlDrawing = simplexml_load_string(
+                                        $xmlDrawing = NULL;
+                                        $xmlDrawingElem = simplexml_load_string(
                                             $this->securityScanner->scan($this->getFromZipArchive($zip, $fileDrawing)),
                                             'SimpleXMLElement',
                                             Settings::getLibXmlLoaderOptions()
-                                        )->children('http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing');
+                                        );
+                                        if ($xmlDrawingElem !== FALSE) {
+                                          $xmlDrawing = $xmlDrawingElem->children('http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing');
+                                        }
+                                        unset($xmlDrawingElem);
 
-                                        if ($xmlDrawing->oneCellAnchor) {
+                                        if ($xmlDrawing && $xmlDrawing->oneCellAnchor) {
                                             foreach ($xmlDrawing->oneCellAnchor as $oneCellAnchor) {
                                                 if ($oneCellAnchor->pic->blipFill) {
                                                     /** @var SimpleXMLElement $blip */
@@ -1688,7 +1693,7 @@ class Xlsx extends BaseReader
                                                 }
                                             }
                                         }
-                                        if ($xmlDrawing->twoCellAnchor) {
+                                        if ($xmlDrawing && $xmlDrawing->twoCellAnchor) {
                                             foreach ($xmlDrawing->twoCellAnchor as $twoCellAnchor) {
                                                 if ($twoCellAnchor->pic->blipFill) {
                                                     $blip = $twoCellAnchor->pic->blipFill->children('http://schemas.openxmlformats.org/drawingml/2006/main')->blip;
@@ -1765,13 +1770,17 @@ class Xlsx extends BaseReader
                                     }
 
                                     // unparsed drawing AlternateContent
-                                    $xmlAltDrawing = simplexml_load_string(
+                                    $xmlAltDrawing = NULL;
+                                    $xmlAltDrawingElem = simplexml_load_string(
                                         $this->securityScanner->scan($this->getFromZipArchive($zip, $fileDrawing)),
                                         'SimpleXMLElement',
                                         Settings::getLibXmlLoaderOptions()
-                                    )->children('http://schemas.openxmlformats.org/markup-compatibility/2006');
-
-                                    if ($xmlAltDrawing->AlternateContent) {
+                                    );
+                                    if ($xmlAltDrawingElem !== FALSE) {
+                                      $xmlAltDrawing = $xmlAltDrawingElem->children('http://schemas.openxmlformats.org/markup-compatibility/2006');
+                                    }
+                                    unset ($xmlAltDrawingElem);
+                                    if ($xmlAltDrawing && $xmlAltDrawing->AlternateContent) {
                                         foreach ($xmlAltDrawing->AlternateContent as $alternateContent) {
                                             $unparsedLoadedData['sheets'][$docSheet->getCodeName()]['drawingAlternateContents'][] = $alternateContent->asXML();
                                         }
