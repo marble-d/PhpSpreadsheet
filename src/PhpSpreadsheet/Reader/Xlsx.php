@@ -1590,7 +1590,6 @@ class Xlsx extends BaseReader
                                     'SimpleXMLElement',
                                     Settings::getLibXmlLoaderOptions()
                                 );
-                                $drawings = [];
                                 foreach ($relsWorksheet->Relationship as $ele) {
                                     if ($ele['Type'] == 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing') {
                                         $drawings[(string) $ele['Id']] = self::dirAdd("$dir/$fileWorksheet", $ele['Target']);
