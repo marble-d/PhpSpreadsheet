@@ -416,8 +416,9 @@ class Html extends BaseWriter
         $html = '';
 
         // Loop all sheets
-        $sheetId = 0;
-        foreach ($sheets as $sheet) {
+        end($sheets);
+        $sheets_lastID = key($sheets);
+        foreach ($sheets as $sheetId => $sheet) {
             // Write table header
             $html .= $this->generateTableHeader($sheet);
 
@@ -494,13 +495,10 @@ class Html extends BaseWriter
 
             // Writing PDF?
             if ($this->isPdf) {
-                if ($this->sheetIndex === null && $sheetId + 1 < $this->spreadsheet->getSheetCount()) {
+                if ($this->sheetIndex === null && $sheetId != $sheets_lastID) {
                     $html .= '<div style="page-break-before:always" />';
                 }
             }
-
-            // Next sheet
-            ++$sheetId;
         }
 
         return $html;
