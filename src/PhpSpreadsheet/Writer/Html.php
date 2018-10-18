@@ -39,7 +39,14 @@ class Html extends BaseWriter
      *
      * @var int
      */
-    private $sheetIndex = 0;
+    private $sheetIndex = 0;              #XXX allows only a single sheet or all
+
+    /**
+     * Sheet indexes to write.
+     *
+     * @var int
+     */
+    private $sheetIndexes = [];
 
     /**
      * Images root.
@@ -300,7 +307,27 @@ class Html extends BaseWriter
     }
 
     /**
-     * Get sheet index.
+     * Get sheets set for writing.
+     *
+     * @see writeAllSheets()
+     *
+     * @return array (associative: index => Worksheet)
+     */
+    protected function getSheets()
+    {
+      if ($this->sheetIndex !== null)
+        return [$this->sheetIndex => $this->spreadsheet->getSheet($this->sheetIndex)];
+
+      $indexes = empty ($this->sheetIndexes) ?
+        range(0, $this->spreadsheet->getSheetCount() - 1) : $this->sheetIndexes;
+      foreach ($indexes as $i)
+        $ret[$i] = $this->spreadsheet->getSheet($i);
+      return $ret;
+    }
+
+
+    /**
+     * Get .
      *
      * @return bool
      */
@@ -310,7 +337,7 @@ class Html extends BaseWriter
     }
 
     /**
-     * Set sheet index.
+     * Set .
      *
      * @param bool $pValue Flag indicating whether the sheet navigation block should be generated or not
      *
@@ -326,9 +353,10 @@ class Html extends BaseWriter
     /**
      * Write all sheets (resets sheetIndex to NULL).
      */
-    public function writeAllSheets()
+    public function writeAllSheets(array $sheets_indexes = null)
     {
         $this->sheetIndex = null;
+        $this->sheetIndexes = $sheets_indexes;
 
         return $this;
     }
@@ -405,12 +433,7 @@ class Html extends BaseWriter
         }
 
         // Fetch sheets
-        $sheets = [];
-        if ($this->sheetIndex === null) {
-            $sheets = $this->spreadsheet->getAllSheets();
-        } else {
-            $sheets[] = $this->spreadsheet->getSheet($this->sheetIndex);
-        }
+        $sheets = $this->getSheets();
 
         // Construct HTML
         $html = '';
@@ -516,12 +539,7 @@ class Html extends BaseWriter
     public function generateNavigation()
     {
         // Fetch sheets
-        $sheets = [];
-        if ($this->sheetIndex === null) {
-            $sheets = $this->spreadsheet->getAllSheets();
-        } else {
-            $sheets[] = $this->spreadsheet->getSheet($this->sheetIndex);
-        }
+        $sheets = $this->getSheets();
 
         // Construct HTML
         $html = '';
@@ -529,13 +547,10 @@ class Html extends BaseWriter
         // Only if there are more than 1 sheets
         if (count($sheets) > 1) {
             // Loop all sheets
-            $sheetId = 0;
-
             $html .= '<ul class="navigation">' . PHP_EOL;
 
-            foreach ($sheets as $sheet) {
+            foreach ($sheets as $sheetId => $sheet) {
                 $html .= '  <li class="sheet' . $sheetId . '"><a href="#sheet' . $sheetId . '">' . $sheet->getTitle() . '</a></li>' . PHP_EOL;
-                ++$sheetId;
             }
 
             $html .= '</ul>' . PHP_EOL;
@@ -863,9 +878,7 @@ class Html extends BaseWriter
         }
 
         // Build styles per sheet
-        foreach ($sheets as $sheet) {
-            // Calculate hash code
-            $sheetIndex = $sheet->getParent()->getIndex($sheet);
+        foreach ($sheets as $sheetIndex => $sheet) {
 
             // Build styles
             // Calculate column widths
@@ -1528,12 +1541,8 @@ class Html extends BaseWriter
         // Identify all cells that should be omitted in HTML due to cell merge.
         // In HTML only the upper-left cell should be written and it should have
         //   appropriate rowspan / colspan attribute
-        $sheetIndexes = $this->sheetIndex !== null ?
-            [$this->sheetIndex] : range(0, $this->spreadsheet->getSheetCount() - 1);
-
-        foreach ($sheetIndexes as $sheetIndex) {
-            $sheet = $this->spreadsheet->getSheet($sheetIndex);
-
+        foreach ($this->getSheets() as $sheetIndex => $sheet)
+        {
             $candidateSpannedRow = [];
 
             // loop through all Excel merged cells
