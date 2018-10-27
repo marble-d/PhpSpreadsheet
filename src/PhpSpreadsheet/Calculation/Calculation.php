@@ -2935,7 +2935,7 @@ class Calculation
 
         //    Parse the formula onto the token stack and calculate the value
         $this->cyclicReferenceStack->push($wsCellReference);
-        $cellValue = $this->processTokenStack($this->_parseFormula($formula, $pCell), $cellID, $pCell);
+        $cellValue = $this->processTokenStack($this->_parseFormula($formula, $pCell), ($pCellParent?$pCellParent->getTitle():'')."!$cellID", $pCell);
         $this->cyclicReferenceStack->pop();
 
         // Save to calculation cache
@@ -3710,9 +3710,9 @@ class Calculation
                             } else {
                                 return $this->raiseFormulaError('Unable to access Cell Reference');
                             }
-                            $stack->push('Cell Reference', $cellValue, $cellRef);
+                            $stack->push('Cell Reference', $cellValue, $cellRef, $cellID);
                         } else {
-                            $stack->push('Error', Functions::REF(), null);
+                            $stack->push('Error', Functions::REF(), null, $cellID);
                         }
 
                         break;
@@ -3764,7 +3764,7 @@ class Calculation
                             $result = '"' . str_replace('""', '"', self::unwrapResult($operand1) . self::unwrapResult($operand2)) . '"';
                         }
                         $this->debugLog->writeDebugLog('Evaluation Result is ', $this->showTypeDetails($result));
-                        $stack->push('Value', $result);
+                        $stack->push('Value', $result, null, $cellID);
 
                         break;
                     case '|':            //    Intersect
@@ -3975,9 +3975,10 @@ class Calculation
                     $cellValue = $this->extractNamedRange($namedRange, ((null !== $pCell) ? $pCellWorksheet : null), false);
                     $pCell->attach($pCellParent);
                     $this->debugLog->writeDebugLog('Evaluation Result for named range ', $namedRange, ' is ', $this->showTypeDetails($cellValue));
-                    $stack->push('Named Range', $cellValue, $namedRange);
-                    if ($cellValue === Calculation\Functions::REF())
+                    $stack->push('Named Range', $cellValue, $namedRange, $cellID);
+                    if ($cellValue === Functions::REF()) {
                         $this->formulaErrorDetails[] = $stack->last();
+                    }
                 } else {
                     return $this->raiseFormulaError("undefined variable '$token'");
                 }

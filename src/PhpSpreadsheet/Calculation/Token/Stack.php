@@ -37,12 +37,13 @@ class Stack
      * @param mixed $value
      * @param mixed $reference
      */
-    public function push($type, $value, $reference = null)
+    public function push($type, $value, $reference = null, $coordinates = null)
     {
         $this->stack[$this->count++] = [
             'type' => $type,
             'value' => $value,
             'reference' => $reference,
+            'coordinates' => $coordinates
         ];
         if ($type == 'Function') {
             $localeFunction = Calculation::localeFunc($value);
