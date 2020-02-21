@@ -3320,6 +3320,7 @@ class Calculation
 
             //    Find out if we're currently at the beginning of a number, variable, cell reference, function, parenthesis or operand
             $isOperandOrFunction = preg_match($regexpMatchString, substr($formula, $index), $match);
+assert( error_log('>>'.__FUNCTION__."opCharacter = '$opCharacter' @{$pCell->getCoordinate()} isOperOrFct: $isOperandOrFunction ({substr($formula, $index)})") );
 
             if ($opCharacter == '-' && !$expectingOperator) {                //    Is it a negation instead of a minus?
                 $stack->push('Unary Operator', '~'); //    Put a negation on the stack
@@ -3546,6 +3547,7 @@ class Calculation
             } elseif (isset(self::$operators[$opCharacter]) && !$expectingOperator) {
                 return $this->raiseFormulaError("Formula Error: Unexpected operator '$opCharacter'");
             } else {    // I don't even want to know what you did to get here
+assert( error_log('>>>'.__FUNCTION__."this unknown failure!") );
                 return $this->raiseFormulaError('Formula Error: An unexpected error occured');
             }
             //    Test for end of formula string
