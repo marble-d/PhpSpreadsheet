@@ -1,6 +1,6 @@
 {
-    "name": "phpoffice/phpspreadsheet",
-    "description": "PHPSpreadsheet - Read, Create and Write Spreadsheet documents in PHP - Spreadsheet engine",
+    "name": "marble-d/phpspreadsheet",
+    "description": "PHPSpreadsheet - Read, Create and Write Spreadsheet documents in PHP - Spreadsheet engine (forked from phpoffice/phpspreadsheet)",
     "keywords": ["PHP", "OpenXML", "Excel", "xlsx", "xls", "ods", "gnumeric", "spreadsheet"],
     "homepage": "https://github.com/PHPOffice/PhpSpreadsheet",
     "type": "library",
